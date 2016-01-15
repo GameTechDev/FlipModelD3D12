@@ -2,7 +2,7 @@ FlipModel D3D12 Sample Application
 ======================================================
 An interactive visualization for understanding the Direct3D 12 Flip Model.
 
-For a detailed explanation, please visit [TODO: insert IDZ link]
+For a detailed explanation, please see this [article](https://software.intel.com/en-us/articles/sample-application-for-direct3d-12-flip-model-swap-chains).
 
 Build Instructions
 ==================
