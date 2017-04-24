@@ -406,6 +406,7 @@ static bool initialize_dx12_internal()
 			{
 				D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,
 				D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,
+				D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,
 			};
 			D3D12_INFO_QUEUE_FILTER filter;
 			memset(&filter, 0, sizeof(filter));
