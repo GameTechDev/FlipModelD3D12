@@ -1,0 +1,10 @@
+/.vs/
+/ARM/
+/Debug/
+/Release/
+/Win32/
+/x64/
+/log.txt
+/FlipModelD3D12.VC.db
+/FlipModelD3D12.sdf
+/FlipModelD3D12.v11.suo
