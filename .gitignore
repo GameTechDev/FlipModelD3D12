@@ -4,6 +4,9 @@
 /Release/
 /Win32/
 /x64/
+/Generated Files/
+/Source/pixel_shader.h
+/Source/vertex_shader.h
 /log.txt
 /FlipModelD3D12.VC.db
 /FlipModelD3D12.sdf
