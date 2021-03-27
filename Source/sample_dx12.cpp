@@ -327,6 +327,9 @@ static bool initialize_dx12_internal()
 	use_debug_layer = true;
 #endif
 
+	// Work around Windows 10 bug causing SetStablePowerState to fail
+	D3D12EnableExperimentalFeatures(0, nullptr, nullptr, nullptr);
+
 	// Enable the D2D debug layer.
 	D2D1_FACTORY_OPTIONS d2dFactoryOptions = {};
 	if (use_debug_layer) {
