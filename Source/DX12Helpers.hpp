@@ -20,6 +20,7 @@
 #include <dxgi1_4.h>
 #include <d3d11on12.h>
 #include <d2d1_3.h>
+#include <string>
 #include <vector>
 
 #if D3D12_DYNAMIC_LINK
