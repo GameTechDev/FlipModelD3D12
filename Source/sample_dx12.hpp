@@ -31,6 +31,7 @@ struct dx12_swapchain_options
 	// changing these will cause the device to be recreated
 	struct {
 		int use_waitable_object;
+		int allow_tearing;
 		int max_frame_latency;
 		int swapchain_buffer_count;
 		int gpu_frame_count;

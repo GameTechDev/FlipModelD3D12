@@ -48,6 +48,7 @@ static void rebuild_hud_string(game_data *game)
 		"[%d] Fullscreen: F11" NEWLINE
 		"[%d] Vsync: Ctrl+K" NEWLINE
 		"[%d] Use Waitable Object: Ctrl+W" NEWLINE
+		"[%d] Allow Tearing: Ctrl+T" NEWLINE
 		"[%d] MaximumFrameLatency: Ctrl+,Ctrl-" NEWLINE
 		"[%d] BufferCount: +,-" NEWLINE
 		"[%d] FrameCount: [,]" NEWLINE
@@ -64,6 +65,7 @@ static void rebuild_hud_string(game_data *game)
 		screen.prefs.windowed==0,
 		screen.prefs.vsync,
 		swapchain_opts.create_time.use_waitable_object,
+		swapchain_opts.create_time.allow_tearing,
 		swapchain_opts.create_time.max_frame_latency,
 		swapchain_opts.create_time.swapchain_buffer_count,
 		swapchain_opts.create_time.gpu_frame_count,
@@ -178,6 +180,9 @@ void process_inputs(game_command *out_action)
 			}
 			if (message.keystroke.code == 'W' && (message.keystroke.modkeys & wsi::modControl)) {
 				swapchain_opts.create_time.use_waitable_object = !swapchain_opts.create_time.use_waitable_object;
+			}
+			if (message.keystroke.code == 'T' && (message.keystroke.modkeys & wsi::modControl)) {
+				swapchain_opts.create_time.allow_tearing = !swapchain_opts.create_time.allow_tearing;
 			}
 			if (message.keystroke.code == VK_F11) {
 				wsi::toggle_fullscreen();
@@ -361,6 +366,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	swapchain_opts.create_time.gpu_frame_count = 2;
 	swapchain_opts.create_time.swapchain_buffer_count = 3;
 	swapchain_opts.create_time.use_waitable_object = 1;
+	swapchain_opts.create_time.allow_tearing = 0;
 	swapchain_opts.create_time.max_frame_latency = 2;
 
 	if (initialize_dx12(&swapchain_opts))

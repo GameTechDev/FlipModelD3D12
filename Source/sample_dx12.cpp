@@ -32,7 +32,7 @@
 #include <d3d11on12.h>
 #include <d2d1_3.h>
 #include <dwrite.h>
-#include <dxgi1_4.h>
+#include <dxgi1_5.h>
 #include <DXGIDebug.h>
 #include <comdef.h>
 #include <wrl.h>
@@ -273,6 +273,7 @@ struct dx12_data
 	float4x4 ortho;
 
 	UINT64 startup_time;
+	bool allow_tearing;
 	EventViz::EventStream eviz;
 	PresentQueueStats pqs;
 	LatencyStatistics latency_stats;
@@ -327,6 +328,9 @@ static bool initialize_dx12_internal()
 	use_debug_layer = true;
 #endif
 
+	// Work around Windows 10 bug causing SetStablePowerState to fail
+	D3D12EnableExperimentalFeatures(0, nullptr, nullptr, nullptr);
+
 	// Enable the D2D debug layer.
 	D2D1_FACTORY_OPTIONS d2dFactoryOptions = {};
 	if (use_debug_layer) {
@@ -351,6 +355,19 @@ static bool initialize_dx12_internal()
 		UINT dxgiFactory2Flags = 0;
 		if(use_debug_layer) dxgiFactory2Flags |= DXGI_CREATE_FACTORY_DEBUG;
 		CheckHresult(CreateDXGIFactory2(dxgiFactory2Flags, IID_PPV_ARGS(&dx12->dxgi_factory)));
+	}
+
+	// Test for tearing support
+	{
+		ComPtr<IDXGIFactory5> dxgi_factory5;
+		if (SUCCEEDED(dx12->dxgi_factory->QueryInterface(dxgi_factory5.GetAddressOf())))
+		{
+			UINT allowTearing = 0;
+			if (S_OK == dxgi_factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)) && allowTearing)
+			{
+				dx12->allow_tearing = true;
+			}
+		}
 	}
 
 	// Create the device
@@ -710,7 +727,14 @@ static void present_dx12(frame_data *frame, UINT64 FrameBeginTime, int vsync, dx
 	auto chain = dx12->swap_chain.Get();
 
 	auto present_call = eviz->Start(EventViz::kCpuQueue, &event_types[EVENT_TYPE_PRESENT_CALL]);
-	chain->Present(SyncInterval, 0);
+	if (SyncInterval == 0 && dx12->allow_tearing && swapchain_opts.create_time.allow_tearing)
+	{
+		chain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
+	}
+	else
+	{
+		chain->Present(SyncInterval, 0);
+	}
 	eviz->End(present_call);
 
 	UINT color_index = frame->backbuffer_index % NUM_FRAME_COLORS;
@@ -746,6 +770,16 @@ static bool resize_dx12_internal(void *pHWND, void *pCoreWindow, float x_dips, f
 
 	bool create_depth = false;
 
+	UINT flags = 0;
+	if (swapchain_opts.create_time.use_waitable_object)
+	{
+		flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+	}
+	if (dx12->allow_tearing && swapchain_opts.create_time.allow_tearing)
+	{
+		flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+	}
+
 	DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {};
 	swap_chain_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swap_chain_desc.Stereo = FALSE;
@@ -755,7 +789,7 @@ static bool resize_dx12_internal(void *pHWND, void *pCoreWindow, float x_dips, f
 	swap_chain_desc.Scaling = DXGI_SCALING_NONE;
 	swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED; // unused
-	swap_chain_desc.Flags = swapchain_opts.create_time.use_waitable_object ? DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT : 0;
+	swap_chain_desc.Flags = flags;
 
 	// Create a new swap chain (initialization, parameters changed, etc)
 	if(!dx12->swap_chain)

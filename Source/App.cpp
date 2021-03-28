@@ -136,6 +136,7 @@ void App::Run()
 					"[%d] Fullscreen: F11" NEWLINE
 					"[%d] Vsync: Ctrl+K" NEWLINE
 					"[%d] Use Waitable Object: Ctrl+W" NEWLINE
+					"[%d] Allow Tearing: Ctrl+T" NEWLINE
 					"[%d] MaximumFrameLatency: Ctrl+,Ctrl-" NEWLINE
 					"[%d] BufferCount: +,-" NEWLINE
 					"[%d] FrameCount: [,]" NEWLINE
@@ -153,6 +154,7 @@ void App::Run()
 					m_fullscreen,
 					m_vsync,
 					m_swapchain_opts.create_time.use_waitable_object,
+					m_swapchain_opts.create_time.allow_tearing,
 					m_swapchain_opts.create_time.max_frame_latency,
 					m_swapchain_opts.create_time.swapchain_buffer_count,
 					m_swapchain_opts.create_time.gpu_frame_count,
@@ -270,6 +272,9 @@ void App::OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::Ke
 	}
 	else if (vkey == VirtualKey::W && controlDown) {
 		m_swapchain_opts.create_time.use_waitable_object = !m_swapchain_opts.create_time.use_waitable_object;
+	}
+	else if (vkey == VirtualKey::T && controlDown) {
+		m_swapchain_opts.create_time.allow_tearing = !m_swapchain_opts.create_time.allow_tearing;
 	}
 	if (vkey == VirtualKey::Up) {
 		if(controlDown){
@@ -399,6 +404,7 @@ void App::serialize_swapchain_options(bool write)
 	serialize(settings, write, "overdraw_factor", opts->any_time.overdraw_factor, 8.0f);
 	serialize(settings, write, "cpu_draw_ms", opts->any_time.cpu_draw_ms, 8);
 	serialize(settings, write, "use_waitable_object", opts->create_time.use_waitable_object, 1);
+	serialize(settings, write, "allow_tearing", opts->create_time.allow_tearing, 0);
 	serialize(settings, write, "max_frame_latency", opts->create_time.max_frame_latency, 2);
 	serialize(settings, write, "swapchain_buffer_count", opts->create_time.swapchain_buffer_count, 3);
 	serialize(settings, write, "gpu_frame_count", opts->create_time.gpu_frame_count, 2);
