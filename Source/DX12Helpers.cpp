@@ -138,6 +138,7 @@ bool FrameQueue::Initialize(
 	ID2D1DeviceContext2 *D2DDeviceContext)
 {
 	this->~FrameQueue();
+	new (this) FrameQueue;
 
 	mNextFrameFence = 1;
 	mNextFrameIndex = 0;

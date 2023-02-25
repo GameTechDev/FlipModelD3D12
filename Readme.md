@@ -19,7 +19,7 @@ Choose your start up project, build and run.
 Requirements
 ============
 - Windows 10 or greater
-- Visual Studio 2015 or higher
+- Visual Studio 2017 or higher
 
 
  
